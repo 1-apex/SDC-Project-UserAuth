@@ -31,11 +31,11 @@ router.post('/register', async (req, res) => {
         const user = new User({ name, email, phone, password, confirm_password });
 
         // save/udpate the database with the new user
-        const user_registered = await user.save();
-
-        if (user_registered) {
+        // const user_registered = await user.save();
+        await user.save();
+        // if (user_registered) {
             res.status(201).send('User created successfully!');
-        }
+        // }
     } catch (err) {
         res.status(500).send({ error: err });
     }
