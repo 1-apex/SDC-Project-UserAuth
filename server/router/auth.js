@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const User = require('../model/userSchema');
 
-router.get("/", (req, res) => {
+router.get("/about", (req, res) => {
     try {
+        res.cookie("test", "hipratham");
         res.status(200).send("Welcome to the home page from router");
     } catch (error) {
         console.log("Error occured while fetching the data" + error);
@@ -26,6 +29,10 @@ router.post('/register', async (req, res) => {
         if (UserExists) {
             return res.status(422).json({ error: 'Email already exists!' });
         }
+        else if (password != confirm_password)
+        {
+            return res.status(422).json({ error: "Passwords doesn't match!" });
+        }
 
         // create a new user in database
         const user = new User({ name, email, phone, password, confirm_password });
@@ -34,7 +41,7 @@ router.post('/register', async (req, res) => {
         // const user_registered = await user.save();
         await user.save();
         // if (user_registered) {
-            res.status(201).send('User created successfully!');
+        res.status(201).send('User created successfully!');
         // }
     } catch (err) {
         res.status(500).send({ error: err });
@@ -52,13 +59,28 @@ router.post('/signin', async (req, res) => {
         }
 
         // find whether the use exists by comparing email and password
-        const userLogin = await User.findOne({ email: email, password: password });
+        const userLogin = await User.findOne({ email: email });
 
-        if (userLogin != null) {
-            res.status(200).send("User login successfull!");
-        }
-        else {
-            res.status(400).send("Invalid Credentials :(");
+        // check the user, if exists then compare the passwords using the bcrypt.compare() method
+        if (userLogin) {
+            const isMatch = await bcrypt.compare(password, userLogin.password);
+
+            const token = await userLogin.generateAuthToken();
+            // console.log(token);
+
+            res.cookie("jwtoken", token, {
+                expires: new Date(Date.now() + 25892000000),
+                httpOnly: true
+            });
+
+            if (isMatch) {
+                res.status(200).send("User login successful!");
+            }
+            else {
+                res.status(400).send("Invalid credentials :(");
+            }
+        } else {
+            res.status(400).send("Invalid credentials :(");
         }
 
     } catch (error) {
