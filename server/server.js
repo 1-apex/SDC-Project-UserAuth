@@ -1,17 +1,17 @@
-const dotenv = require('dotenv');
+require('dotenv').config();
 const express = require('express');
 const app = express();
+const router = require('./router/auth-router');
+const connect_DB = require('./utils/db');
 
-dotenv.config({path:'./config.env'});   // configuring the environment file for securing the database password 
-require('./db/db_connection');  // connecting with the database 
-app.use(express.json());    // used to convert the data to json
-app.use(require('./router/auth'));
+app.use(express.json());
 
-const User = require('./model/userSchema');
+app.use('/api/auth', router);
 
-const PORT = process.env.PORT;  // importing the port number from the config.env file 
+const PORT = 5000;
 
-// starting the server on specified port 
-app.listen(PORT, () => {
-    console.log(`server is running at port : ${PORT}`);
-});x
+connect_DB().then(()=> {  
+    app.listen(PORT, () => {
+        console.log(`Server is running at port: ${PORT}`);
+    })
+})
