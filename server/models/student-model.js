@@ -25,6 +25,16 @@ const StudentSchema = new mongoose.Schema({
     }
 })
 
+// check the password
+StudentSchema.methods.checkPassword = async function(password) {
+    try {
+        return await bcrypt.compare(password, this.password);
+    } catch (error) {
+        // console.log(error);
+        return error;
+    }
+}
+
 // secure the password
 StudentSchema.pre('save', async function () {
     const user = this;
@@ -58,7 +68,8 @@ StudentSchema.methods.generateToken = async function () {
             }
         )
     } catch (error) {
-        console.log(error);
+        // console.log(error);
+        return error;
     }
 }
 
