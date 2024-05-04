@@ -70,7 +70,6 @@ const login = async (req, res) => {
         else {
             res.status(401).json({ message: "Invalid credentials." });
         }
-
     } catch (error) {
         // console.error("Error in login:", error);
         return res.status(500).json({ message: 'Internal sevrer error' });
